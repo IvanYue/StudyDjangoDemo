@@ -36,31 +36,4 @@ urlpatterns = [
     path('editTearcher/',views.editTearcher),
     path('deleteTearcher/',views.deleteTearcher),
 
-
-    #模态框
-    ###班级
-    path('model_add_class/',views.model_add_class),
-    path('model_edit_class/',views.model_edit_class),
-    path('model_delete_class/',views.model_delete_class),
-
-    ###学生
-    path('model_add_student/', views.model_add_student),
-    path('model_edit_student/', views.model_edit_student),
-    path('model_delete_student/', views.model_delete_student),
-
-    ###老师
-    path('model_add_teacher/', views.model_add_teacher),
-    path('get_all_class/',views.get_all_class),
-
-
-    ###登录
-    path('login/',views.login),
-    ###注册
-    path('register/',views.register),
-    
-    
-    
-    ###
-    path('layout/',views.layout)
-
 ]
