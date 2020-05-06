@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>classes</title>
+    {#    <script src="/static/jquery-3.4.1.min.js"></script>#}
+{#    <script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>#}
+{#    <meta name="viewport" content="width=device-width, initial-scale=1">#}
+{#    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->#}
+{#    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"#}
+{#          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">#}
+{#    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->#}
+{#    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"#}
+{#            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"#}
+{#            crossorigin="anonymous"></script>#}
+    <script src="/static/jquery-3.4.1.min.js"></script>
+    <link rel="stylesheet" href="/static/plugins/bootstrap-3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/plugins/font-awesome-4.7.0/css/font-awesome.min.css">
+</head>
+<body style="margin: 30px">
+
+<ul class="nav nav-tabs">
+    <li role="presentation"><a href="/class/">班级列表</a></li>
+    <li role="presentation"><a href="/students/">学生列表</a></li>
+    <li role="presentation" class="active"><a href="/tearchers/">老师列表</a></li>
+</ul>
+
+<div class="panel panel-success">
+    <!-- Default panel contents -->
+    <div class="panel-heading">老师列表
+        <a href="/addtearcher/" class="btn btn-primary ">添加老师</a>
+        <a id="btnAddTeacher" class="btn btn-primary ">模态框添加老师</a>
+    </div>
+    <!-- Table -->
+    <table class="table  table-bordered table-hover table-striped">
+        <thead>
+        <tr>
+            <td>ID</td>
+            <td>老师姓名</td>
+            <td>班级</td>
+            <td>操作</td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for tearcher in result %}
+            <tr>
+                <td>{{ tearcher.tid }}</td>
+                <td>{{ tearcher.tname }}</td>
+                <td>
+                    {% for iteam in tearcher.classes %}
+                        <span style="display: inline-block;padding: 5px;border: 1px solid red">{{ iteam.name }}</span>
+                    {% endfor %}
+                </td>
+                <td>
+                    <a class="btn btn-info " href="/editTearcher/?tid={{tearcher.tid}}">编辑</a>
+                    <a class="btn btn-info" onclick="showModel();">模态框编辑</a>
+                    <a class="btn btn-danger fa fa-trash-o fa-lg" href="/deleteTearcher/?tid={{ tearcher.tid }}">删除</a>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+    {#    <div class="panel-footer"><a onclick="showModel();" class="btn btn-primary">添加老师</a></div>#}
+</div>
+
+
+
+
+<script src="/static/jquery-3.4.1.min.js"></script>
+
+{# 模态框样式#}
+<style>
+        .hide {
+            display: none;
+        }
+
+        .shadow {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background-color: black;
+            opacity: 0.4;
+            z-index: 999;
+        }
+
+        .model {
+            z-index: 1000;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            height: 300px;
+            width: 400px;
+            background-color: white;
+            margin-left: -200px;
+            margin-top: -150px;
+        }
+    .loading{
+        position: fixed;
+        width: 32px;
+        height: 32px;
+        left: 50%;
+        top: 50%;
+        margin-left: -16px;
+        margin-top: -16px;
+        background-image: url("/static/images/loading.gif");
+    }
+    </style>
+
+<script>
+    //页面加载完成后之执行
+    $(function () {
+        bingAdd()
+    })
+    
+    function  bingAdd() {
+        $('#btnAddTeacher').click(function () {
+            //显示添加
+            $('#shadow,#loading').removeClass('hide');
+            //发送ajax请求，获取所有班级信息
+            //在classIds 下拉框中生成option
+            $.ajax({
+                url:'/get_all_class',
+                type: 'GET',
+                dataType:'JSON',
+                success:function (data) {
+                    $('#model').removeClass('hide');
+                    $('#loading').addClass('hide');
+                    //将所有数据添加到select中 option
+                    $.each(data,function (index,item) {
+                        var tag = document.createElement('option')
+                        tag.setAttribute('value',item.id);
+                        //tag.setAttribute('selected','selected');
+                        tag.innerText = item.name
+                        $('#addClassId').append(tag)
+                    });
+                }
+            })
+        })
+        //提交
+        $('#addTearcher').click(function () {
+
+            //提交添加
+            $.ajax({
+                url:'/model_add_teacher/',
+                type:'POST',
+                dataType:'JSON',
+                data:{'tname':$('#addtname').val(),'cids':$('#addClassId').val()},
+                traditional:true,//参数中有列表需要添加此属性，否则传列表jquery会做特殊的处理。为了告诉jquery不做特殊处理，直接把列表传到后台
+                success:function (data) {
+                    if (data.status){
+                        //成功
+                        //方案一 ： 直接刷新数据
+                        location.reload();
+                        {#$('#shadow,#model').addClass('hide');#}
+                        //方案二：给table里面手动添加这个数据
+                    } else{
+                        //失败
+                        alert(data.msg)
+                    }
+                }
+            })
+        })
+    }
+
+    function bingdEdit() {
+        /*
+        * index = [11,22,33].indexOf(22)
+        *
+        * */
+    }
+
+</script>
+
+
+
+{#添加的模态框#}
+<div id="shadow" class="shadow hide"></div>
+{# loading #}
+<div id="loading" class="loading hide"></div>
+<div id="model" class="model hide">
+
+    <h3>添加老师</h3>
+    <p>
+        <input id="addtname" type="text" name="addtname">
+    <p>
+        <select multiple name="classIds" id="addClassId">
+{#            {% for class in class_list %}#}
+{#                <option value="{{ class.id }}">{{ class.name }}</option>#}
+{#            {% endfor %}#}
+        </select>
+    </p>
+    </p>
+    <div>
+        <input type="button" value="提交" id="addTearcher">
+        <input type="button" value="取消" onclick="cancelModel();">
+        <span id="errormsg"></span>
+    </div>
+</div>
+{#编辑的模态框#}
+<div id="editmodel" class="model hide">
+    <h3>编辑老师</h3>
+    <p>
+        <input style="display: none" id="editid" type="text" name="id">
+        <input id="editname" type="text" name="name">
+    </p>
+    <div>
+        <input type="button" value="提交" onclick="editAjaxSend();">
+        <input type="button" value="取消" onclick="cancelModel();">
+        <span id="errormsg"></span>
+    </div>
+</div>
+
+{#编辑的模态框#}
+<div id="deletemodel" class="model hide">
+    <h3>删除</h3>
+    <div>
+        <input style="display: none" id="deleteid" type="text" name="id">
+        <span id="deletename"></span>
+    </div>
+    <div>
+        <input type="button" value="删除" onclick="deleteAjaxSend();">
+        <input type="button" value="取消" onclick="cancelModel();">
+        <span id="errormsg"></span>
+    </div>
+</div>
+
+
+</body>
+</html>
