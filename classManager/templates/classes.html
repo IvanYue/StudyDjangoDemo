@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>classes</title>
+    {#    <script src="/static/jquery-3.4.1.min.js"></script>#}
+    {# 模态框样式#}
+    <style>
+        .hide {
+            display: none;
+        }
+
+        .shadow {
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background-color: black;
+            opacity: 0.4;
+            z-index: 999;
+        }
+
+        .model {
+            z-index: 1000;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            height: 300px;
+            width: 400px;
+            background-color: white;
+            margin-left: -200px;
+            margin-top: -150px;
+        }
+    </style>
+    <script src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous"></script>
+</head>
+<body style="margin: 30px">
+
+<ul class="nav nav-tabs">
+  <li role="presentation" class="active"><a href="#">班级列表</a></li>
+  <li role="presentation"><a href="/students/">学生列表</a></li>
+  <li role="presentation"><a href="/tearchers/">老师列表</a></li>
+</ul>
+
+
+
+<div class="panel panel-success">
+    <!-- Default panel contents -->
+    <div class="panel-heading">班级列表
+        <a href="/addclass" class="btn btn-primary">添加班级</a>
+        <a onclick="showModel();" class="btn btn-primary">对话框添加</a>
+    </div>
+    <!-- Table -->
+    <table class="table">
+        <thead>
+        <tr>
+            <td>ID</td>
+            <td>班级名称</td>
+            <td>操作</td>
+        </tr>
+        </thead>
+        <tbody>
+        {% for foo in class_list %}
+            <tr>
+                <td>{{ foo.id }}</td>
+                <td>{{ foo.name }}</td>
+                <td>
+                    <a href="\edit_class\?id={{ foo.id }}" class="btn btn-info">编辑</a>
+                    {#ajax onclick：return false 的时候不会跳转 href链接,阻止默认事件，js前端判断不让其访问后台#}
+                    <a onclick="modelEdit(this);" class="btn btn-info">对话框编辑</a>
+                    <a href="\delete_class\?id={{ foo.id }}" class="btn btn-danger">删除</a>
+                    <a onclick="modelDelete(this);"  class="btn btn-danger">对话框删除</a></td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+</div>
+
+
+{#添加的模态框#}
+<div id="shadow" class="shadow hide"></div>
+<div id="model" class="model hide">
+    {#form 表单提交会刷新页面#}
+    {#    <form action="/model_add_class/" method="post">#}
+    {#        <p>#}
+    {#            <input type="text" name="name">#}
+    {#        <div>#}
+    {#            <input type="submit" value="提交">#}
+    {#        </div>#}
+    {#        </p>#}
+    {#    </form>#}
+    <h3>添加班级</h3>
+    <p>
+        <input id="name" type="text" name="name">
+
+    </p>
+    <div>
+        <input type="button" value="提交" onclick="AjaxSend();">
+        <input type="button" value="取消" onclick="cancelModel();">
+        <span id="errormsg"></span>
+    </div>
+</div>
+{#编辑的模态框#}
+<div id="editmodel" class="model hide">
+    <h3>编辑框</h3>
+    <p>
+        <input style="display: none" id="editid" type="text" name="id">
+        <input id="editname" type="text" name="name">
+    </p>
+    <div>
+        <input type="button" value="提交" onclick="editAjaxSend();">
+        <input type="button" value="取消" onclick="cancelModel();">
+        <span id="errormsg"></span>
+    </div>
+</div>
+
+{#删除#}
+<div id="model" class="model hide">
+    {#form 表单提交会刷新页面#}
+    {#    <form action="/model_add_class/" method="post">#}
+    {#        <p>#}
+    {#            <input type="text" name="name">#}
+    {#        <div>#}
+    {#            <input type="submit" value="提交">#}
+    {#        </div>#}
+    {#        </p>#}
+    {#    </form>#}
+
+    <p>
+        <input id="name" type="text" name="name">
+
+    </p>
+    <div>
+        <input type="button" value="提交" onclick="AjaxSend();">
+        <input type="button" value="取消" onclick="cancelModel();">
+        <span id="errormsg"></span>
+    </div>
+</div>
+{#编辑的模态框#}
+<div id="deletemodel" class="model hide">
+    <h3>删除</h3>
+    <div>
+        <input style="display: none" id="deleteid" type="text" name="id">
+        <span id="deletename"></span>
+    </div>
+    <div>
+        <input type="button" value="删除" onclick="deleteAjaxSend();">
+        <input type="button" value="取消" onclick="cancelModel();">
+        <span id="errormsg"></span>
+    </div>
+</div>
+<script>
+
+
+    //添加
+    function AjaxSend() {
+        $.ajax({
+            url: '/model_add_class/',//地址
+            type: 'POST',//提交方式
+            data: {'name': $('#name').val()},//提交的数据
+            success: function (data) {
+                //当服务端处理完成后，处理数据时，该函数自动调用
+                //data = 服务端返回的值
+                console.log(data);
+                if (data == 'ok') {
+                    location.href = '/class/'
+                } else {
+                    $('#errormsg').text(data)
+                }
+            }
+        })
+    }
+
+    //编辑
+    function modelEdit(ths) {
+        document.getElementById("shadow").classList.remove("hide")
+        document.getElementById("editmodel").classList.remove("hide")
+
+        //获取当前点击标签 ths
+        //获取当前标签的父标签，再找其上方标签
+        //获取班级当前行班级名称，赋值到编辑对话框中
+        var row = $(ths).parent().prevAll(); //上面的所有标签
+        var name = $(row[0]).text();
+        $("#editname").val(name);
+        var id = $(row[1]).text();
+        $("#editid").val(id)
+
+    }
+
+    //发送编辑后的数据
+    function editAjaxSend() {
+        var id = $('#editid').val()
+        var name = $('#editname').val()
+        $.ajax({
+            url: '/model_edit_class/',
+            type: 'POST',
+            data: {"id": id, 'name': name},
+            success: function (data) {
+                /*
+                *   data 是字符串类型
+                    JSON.parse(字符串) => 对象
+                    JSON.stringify(对象) => 字符串
+                * */
+                data = JSON.parse(data)
+                if (data.status) {
+                    // location.href = '/class/'
+                    location.reload()
+                } else {
+                    alert(data.msg)
+                }
+            }
+        })
+    }
+
+    //删除
+    function modelDelete(ths) {
+        document.getElementById("shadow").classList.remove("hide")
+        document.getElementById("deletemodel").classList.remove("hide")
+        //获取当前点击标签 ths
+        //获取当前标签的父标签，再找其上方标签
+        //获取班级当前行班级名称，赋值到编辑对话框中
+        var row = $(ths).parent().prevAll(); //上面的所有标签
+        var name = $(row[0]).text();
+        $("#deletename").text(name);
+        var id = $(row[1]).text();
+        $("#deleteid").val(id)
+        console.log(name)
+    }
+
+    function deleteAjaxSend() {
+        var id = $("#deleteid").val()
+        $.ajax({
+            url: '/model_delete_class/',
+            type: 'POST',
+            data: {'id': id},
+            success: function (data) {
+                console.log(data)
+                location.reload()
+            }
+        })
+    }
+
+    //显示模态框
+    function showModel() {
+        document.getElementById("shadow").classList.remove("hide")
+        document.getElementById("model").classList.remove("hide")
+    }
+
+    //隐藏
+    function cancelModel() {
+        document.getElementById("shadow").classList.add("hide")
+        document.getElementById("model").classList.add("hide")
+        document.getElementById("editmodel").classList.add("hide")
+        document.getElementById("deletemodel").classList.add("hide")
+    }
+</script>
+
+</body>
+</html>
