@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑学生名称</title>
+
+</head>
+<body>
+<h1>编辑学生信息</h1>
+<div>
+    <p>原名：{{ student.sname }}</p>
+    <p>原班级：{{ student.name }} </p>
+</div>
+<form action="/editStudent/" method="post">
+    <input style="display: none" name="id" value="{{ student.id }}">
+    改为：<input type="text" name="sname" value="{{ student.sname }}">
+    <select name="class_id">
+        {% for class in class_list %}
+            {% if class.id == student.cid %}
+                <option selected value="{{ class.id }}">{{ class.name }}</option>
+            {% else %}
+                <option value="{{ class.id }}">{{ class.name }}</option>
+            {% endif %}
+
+        {% endfor %}
+    </select>
+    <div><input type="submit" value="提交"></div>
+</form>
+</body>
+</html>

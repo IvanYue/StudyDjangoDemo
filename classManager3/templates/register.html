@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>login</title>
+
+    <script src="/static/jquery-3.4.1.min.js"></script>
+    <link rel="stylesheet" href="/static/plugins/bootstrap-3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/plugins/font-awesome-4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+
+
+<div style="width: 300px;left: 50%;position: fixed;margin-left: -150px;margin-top: 100px">
+    <h1>用户注册</h1>
+    <div class="form-group">
+        <label>账号:</label>
+        <input type="text" class="form-control" id="accounts" placeholder="admin">
+    </div>
+    <div class="form-group">
+        <label for="exampleInputPassword1">密码:</label>
+        <input type="password" class="form-control" id="password1" placeholder="123456">
+    </div>
+    <div class="form-group">
+        <label for="exampleInputPassword1">再次输入密码:</label>
+        <input type="password" class="form-control" id="password2" placeholder="123456">
+    </div>
+    <div class="checkbox">
+        <label>
+            <input type="checkbox"> 记住我
+        </label>
+    </div>
+    <button type="submit" class="btn btn-primary " id="register">注册</button>
+    <a type="submit" class="btn btn-primary " id="cancel" href="/login/">取消</a>
+    <span id="errormsg" style="color: red;"></span>
+</div>
+<script src="/static/jquery-3.4.1.min.js"></script>
+<script>
+    $(function () {
+        $('#register').click(function () {
+            var accounts = $('#accounts').val();
+            var pwd1 = $('#password1').val();
+            var pwd2 = $('#password2').val();
+
+            if (accounts.length > 0 && pwd1.length > 0 && pwd2.length > 0) {
+                if (pwd1 == pwd2) {
+                    $.ajax({
+                        url: '/register/',
+                        type: 'POST',
+                        data: {'account': accounts, 'pwd': pwd1},
+                        dataType: 'JSON',
+                        success: (function (data) {
+                            if (data.status) {
+                                location.href = '/login/'
+                            } else {
+                                $('#errormsg').text(data.msg)
+                            }
+                        })
+                    })
+                } else {
+                    $('#errormsg').text('两次输入密码不一致')
+                }
+
+            } else {
+                $('#errormsg').text('账号或密码不能为空')
+            }
+
+        })
+
+    })
+</script>
+</body>
+</html>
